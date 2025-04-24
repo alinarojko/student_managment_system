@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QLabel, QWidget, QGridLayout,\
     QLineEdit, QPushButton, QMainWindow, QTableWidget, QTableWidgetItem,\
-    QDialog, QVBoxLayout, QComboBox, QToolBar
+    QDialog, QVBoxLayout, QComboBox, QToolBar, QStatusBar
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QIcon
 import sqlite3
@@ -49,8 +49,12 @@ class MainWindow(QMainWindow):
         toolbar.addAction(add_student_action)
         toolbar.addAction(search_action)
 
+        # Add Status bar and elements
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
 
-
+        # Detect a cell selection
+        self.table.cellClicked.connect(self.cell_clicked)
 
     # Add data to the table using SQLite from db file
     def load_data(self):
@@ -71,6 +75,37 @@ class MainWindow(QMainWindow):
         dialog = SearchDialog()
         dialog.exec()
 
+    def cell_clicked(self):
+        edit_button = QPushButton("Edit Record")
+        edit_button.clicked.connect(self.edit)
+
+        delete_button = QPushButton("Delete Record")
+        delete_button.clicked.connect(self.delete)
+
+        # To avoid duplicating buttons , check if they already there
+        children = self.findChildren(QPushButton)
+        if children:
+            for child in children:
+                self.status_bar.removeWidget(child)
+
+        self.status_bar.addWidget(delete_button)
+        self.status_bar.addWidget(edit_button)
+
+    def delete(self):
+        dialog = DeleteDialog()
+        dialog.exec()
+
+    def edit(self):
+        dialog = EditDialog()
+        dialog.exec()
+
+
+class DeleteDialog(QDialog):
+    pass
+
+
+class EditDialog(QDialog):
+    pass
 
 # Class to activate popup window "Add student"
 class InsertDialog(QDialog):
